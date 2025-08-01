@@ -1,10 +1,12 @@
 import express from 'express'
 import { bugService } from './services/bugs.service.js'
+import cookieParser from 'cookie-parser'
 
 const app = express()
 
 // App Configuration
 app.use(express.static('public'))
+app.use(cookieParser())
 
 // Basic Routes
 app.get('/', (req, res) => res.send('Hello there'))
@@ -39,9 +41,24 @@ app.get('/api/bug/save', (req, res) => {
     })
 })
 
-// get by ID
+// get by ID (with cookies)
 app.get('/api/bug/:bugId', (req, res) => {
-  Promise.resolve(bugService.getById(req.params.bugId))
+  const bugId = req.params.bugId
+  let visitedBugs = req.cookies.visitedBugs || []
+
+  // Ensure uniqueness
+  visitedBugs = [...new Set([...visitedBugs, bugId])]
+
+  console.log('User visited the following bugs:', visitedBugs)
+
+  if (visitedBugs.length > 3) {
+    return res.status(401).send('Wait for a bit')
+  }
+
+  // Set cookie with 7-second expiration
+  res.cookie('visitedBugs', visitedBugs, { maxAge: 7000 })
+
+  Promise.resolve(bugService.getById(bugId))
     .then(bug => res.send(bug))
     .catch(err => {
       console.error('Cannot get bug:', err)
