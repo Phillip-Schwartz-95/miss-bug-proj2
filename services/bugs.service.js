@@ -7,12 +7,33 @@ export const bugService = {
   query,
   getById,
   save,
-  remove
+  remove,
+  getDefaultFilter
 }
 
-function query() {
+function query(filterBy = {}) {
   const bugData = fs.readFileSync(bugFilePath, 'utf8')
-  return JSON.parse(bugData)
+  let bugs = JSON.parse(bugData)
+
+  // Filter by text
+  if (filterBy.txt) {
+    const regex = new RegExp(filterBy.txt, 'i')
+    bugs = bugs.filter(bug =>
+      regex.test(bug.title) || regex.test(bug.description)
+    )
+  }
+
+  // Filter by minimum severity
+  if (filterBy.minSeverity) {
+    const minSeverity = +filterBy.minSeverity
+    bugs = bugs.filter(bug => bug.severity >= minSeverity)
+  }
+
+  return bugs
+}
+
+function getDefaultFilter() {
+  return { txt: '', minSeverity: 0 }
 }
 
 function getById(bugId) {

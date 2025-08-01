@@ -12,9 +12,11 @@ app.use(cookieParser())
 app.get('/', (req, res) => res.send('Hello there'))
 app.get('/nono', (req, res) => res.redirect('/'))
 
-// get
+// GET /api/bug with filtering
 app.get('/api/bug', (req, res) => {
-  Promise.resolve(bugService.query())
+  const filterBy = req.query
+
+  Promise.resolve(bugService.query(filterBy))
     .then(bugs => res.send(bugs))
     .catch(err => {
       console.error('Cannot get bugs:', err)
