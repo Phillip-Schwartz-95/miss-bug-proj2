@@ -12,28 +12,54 @@ export const bugService = {
 }
 
 function query(filterBy = {}) {
-  const bugData = fs.readFileSync(bugFilePath, 'utf8')
-  let bugs = JSON.parse(bugData)
+  const bugs = JSON.parse(fs.readFileSync(bugFilePath, 'utf-8'))
+  let filteredBugs = [...bugs]
 
-  // Filter by text
+  // 🔍 Filter by text
   if (filterBy.txt) {
     const regex = new RegExp(filterBy.txt, 'i')
-    bugs = bugs.filter(bug =>
+    filteredBugs = filteredBugs.filter(bug =>
       regex.test(bug.title) || regex.test(bug.description)
     )
   }
 
-  // Filter by minimum severity
+  // 🔍 Filter by severity
   if (filterBy.minSeverity) {
-    const minSeverity = +filterBy.minSeverity
-    bugs = bugs.filter(bug => bug.severity >= minSeverity)
+    filteredBugs = filteredBugs.filter(bug => bug.severity >= +filterBy.minSeverity)
   }
 
-  return bugs
+  // 🔍 Filter by labels
+  if (filterBy.labels) {
+    const labelArr = Array.isArray(filterBy.labels)
+      ? filterBy.labels
+      : filterBy.labels.split(',')
+
+    filteredBugs = filteredBugs.filter(bug =>
+      bug.labels?.some(label => labelArr.includes(label))
+    )
+  }
+
+  // 🔃 Sort by field and direction
+  const sortBy = filterBy.sortBy || 'createdAt'
+  const sortDir = +filterBy.sortDir || 1
+
+  filteredBugs.sort((a, b) => {
+    if (a[sortBy] < b[sortBy]) return -1 * sortDir
+    if (a[sortBy] > b[sortBy]) return 1 * sortDir
+    return 0
+  })
+
+  // Paging
+  const pageSize = 5
+  const pageIdx = +filterBy.pageIdx || 0
+  const startIdx = pageIdx * pageSize
+  filteredBugs = filteredBugs.slice(startIdx, startIdx + pageSize)
+
+  return filteredBugs
 }
 
 function getDefaultFilter() {
-  return { txt: '', minSeverity: 0 }
+  return { txt: '', minSeverity: 0, labels: [] }
 }
 
 function getById(bugId) {

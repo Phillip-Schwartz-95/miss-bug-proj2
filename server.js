@@ -12,8 +12,9 @@ app.use(cookieParser())
 app.get('/', (req, res) => res.send('Hello there'))
 app.get('/nono', (req, res) => res.redirect('/'))
 
-// GET /api/bug with filtering
+// GET /api/bug with filtering, sorting, paging
 app.get('/api/bug', (req, res) => {
+  console.log('Incoming query:', req.query)
   const filterBy = req.query
 
   Promise.resolve(bugService.query(filterBy))
@@ -24,40 +25,18 @@ app.get('/api/bug', (req, res) => {
     })
 })
 
-// save
-app.get('/api/bug/save', (req, res) => {
-  const { title, description, severity, _id } = req.query
-
-  const bug = {
-    _id,
-    title,
-    description,
-    severity: +severity
-  }
-
-  Promise.resolve(bugService.save(bug))
-    .then(savedBug => res.send(savedBug))
-    .catch(err => {
-      console.error('Cannot save bug:', err)
-      res.status(400).send('Cannot save bug')
-    })
-})
-
-// get by ID (with cookies)
+// GET /api/bug/:bugId (with cookie-based view limit)
 app.get('/api/bug/:bugId', (req, res) => {
   const bugId = req.params.bugId
   let visitedBugs = req.cookies.visitedBugs || []
 
-  // Ensure uniqueness
   visitedBugs = [...new Set([...visitedBugs, bugId])]
-
   console.log('User visited the following bugs:', visitedBugs)
 
   if (visitedBugs.length > 3) {
     return res.status(401).send('Wait for a bit')
   }
 
-  // Set cookie with 7-second expiration
   res.cookie('visitedBugs', visitedBugs, { maxAge: 7000 })
 
   Promise.resolve(bugService.getById(bugId))
@@ -68,7 +47,27 @@ app.get('/api/bug/:bugId', (req, res) => {
     })
 })
 
-// remove
+// GET /api/bug/save (not RESTful, but kept for now)
+app.get('/api/bug/save', (req, res) => {
+  const { title, description, severity, _id, labels = [] } = req.query
+
+  const bug = {
+    _id,
+    title,
+    description,
+    severity: +severity,
+    labels: Array.isArray(labels) ? labels : [labels]
+  }
+
+  Promise.resolve(bugService.save(bug))
+    .then(savedBug => res.send(savedBug))
+    .catch(err => {
+      console.error('Cannot save bug:', err)
+      res.status(400).send('Cannot save bug')
+    })
+})
+
+// GET /api/bug/:bugId/remove
 app.get('/api/bug/:bugId/remove', (req, res) => {
   Promise.resolve(bugService.remove(req.params.bugId))
     .then(() => {
@@ -80,7 +79,6 @@ app.get('/api/bug/:bugId/remove', (req, res) => {
       res.status(400).send('Cannot remove bug')
     })
 })
-
 
 const port = 3030
 app.listen(port, () => {
