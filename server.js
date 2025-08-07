@@ -25,6 +25,22 @@ app.get('/api/bug', (req, res) => {
     })
 })
 
+// GET /api/bug/count
+app.get('/api/bug/count', (req, res) => {
+  try {
+    const filterBy = req.query
+    console.log('Received filterBy:', filterBy)
+
+    const total = bugService.getTotalCount(filterBy)
+    console.log('Calculated total bugs:', total)
+
+    res.json({ total })
+  } catch (err) {
+    console.error('Error in /api/bug/count:', err)
+    res.status(500).send('Server error')
+  }
+})
+
 // GET /api/bug/:bugId (with cookie-based view limit)
 app.get('/api/bug/:bugId', (req, res) => {
   const bugId = req.params.bugId

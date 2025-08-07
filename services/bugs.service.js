@@ -8,14 +8,15 @@ export const bugService = {
   getById,
   save,
   remove,
-  getDefaultFilter
+  getDefaultFilter,
+  getTotalCount,
 }
 
 function query(filterBy = {}) {
   const bugs = JSON.parse(fs.readFileSync(bugFilePath, 'utf-8'))
   let filteredBugs = [...bugs]
 
-  // 🔍 Filter by text
+  // Filter by text
   if (filterBy.txt) {
     const regex = new RegExp(filterBy.txt, 'i')
     filteredBugs = filteredBugs.filter(bug =>
@@ -23,12 +24,12 @@ function query(filterBy = {}) {
     )
   }
 
-  // 🔍 Filter by severity
+  // Filter by severity
   if (filterBy.minSeverity) {
     filteredBugs = filteredBugs.filter(bug => bug.severity >= +filterBy.minSeverity)
   }
 
-  // 🔍 Filter by labels
+  // Filter by labels
   if (filterBy.labels) {
     const labelArr = Array.isArray(filterBy.labels)
       ? filterBy.labels
@@ -39,7 +40,7 @@ function query(filterBy = {}) {
     )
   }
 
-  // 🔃 Sort by field and direction
+  // Sort by field and direction
   const sortBy = filterBy.sortBy || 'createdAt'
   const sortDir = +filterBy.sortDir || 1
 
@@ -65,6 +66,12 @@ function getDefaultFilter() {
 function getById(bugId) {
   const bugs = query()
   return bugs.find(bug => bug._id === bugId)
+}
+
+//total bugs
+function getTotalCount(filterBy = {}) {
+  const bugs = query(filterBy) 
+  return bugs.length
 }
 
 function save(bugToSave) {

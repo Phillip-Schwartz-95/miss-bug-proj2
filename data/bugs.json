@@ -5,7 +5,11 @@
     "description": "Homepage crashes with error 502",
     "severity": 2,
     "createdAt": 1542111359454,
-    "labels": ["critical", "backend", "urgent"]
+    "labels": [
+      "critical",
+      "backend",
+      "urgent"
+    ]
   },
   {
     "_id": "ghi789",
@@ -13,7 +17,11 @@
     "description": "Dropdown menu doesn't expand on click",
     "severity": 1,
     "createdAt": 1542122359454,
-    "labels": ["minor", "frontend", "review"]
+    "labels": [
+      "minor",
+      "frontend",
+      "review"
+    ]
   },
   {
     "_id": "jkl012",
@@ -21,7 +29,11 @@
     "description": "App takes too long to respond after login",
     "severity": 3,
     "createdAt": 1542133359454,
-    "labels": ["performance", "critical", "backend"]
+    "labels": [
+      "performance",
+      "critical",
+      "backend"
+    ]
   },
   {
     "_id": "mno345",
@@ -29,14 +41,10 @@
     "description": "Cart total miscalculates when applying discount",
     "severity": 2,
     "createdAt": 1542144359454,
-    "labels": ["logic", "frontend", "review"]
-  },
-  {
-    "_id": "pqr678",
-    "title": "Notification not dismissing",
-    "description": "Toast notification stays on screen indefinitely",
-    "severity": 1,
-    "createdAt": 1542155359454,
-    "labels": ["ui", "frontend", "non-urgent"]
+    "labels": [
+      "logic",
+      "frontend",
+      "review"
+    ]
   }
 ]
