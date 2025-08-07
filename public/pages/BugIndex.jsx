@@ -88,6 +88,18 @@ export function BugIndex() {
         setFilterBy(prev => ({ ...prev, ...newFilter }))
     }
 
+    function onDownloadPdf() {
+    const query = {
+        ...filterBy,
+        sortBy,
+        sortDir,
+        pageIdx
+    }
+
+    const queryStr = new URLSearchParams(query).toString()
+    window.open(`/api/bug/pdf?${queryStr}`, '_blank')
+}
+
     return <section className="bug-index main-content">
         <header>
             <h2>Bug List</h2>
@@ -95,6 +107,7 @@ export function BugIndex() {
                 Showing page {pageIdx + 1} of {totalPages} ({totalBugs} bugs total)
             </p>
             <button onClick={onAddBug}>Add Bug</button>
+            <button onClick={onDownloadPdf}>Download Bug Report (PDF)</button>
         </header>
 
         <BugFilter

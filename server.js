@@ -1,6 +1,8 @@
 import express from 'express'
 import { bugService } from './services/bugs.service.js'
 import cookieParser from 'cookie-parser'
+import { pdfService } from './services/pdf.service.js'
+import path from 'path'
 
 const app = express()
 
@@ -39,6 +41,22 @@ app.get('/api/bug/count', (req, res) => {
     console.error('Error in /api/bug/count:', err)
     res.status(500).send('Server error')
   }
+})
+
+// GET /api/bug/pdf (to generate PDF)
+app.get('/api/bug/pdf', (req, res) => {
+  const filterBy = req.query
+
+  pdfService.createPdf(filterBy)
+    .then(filePath => {
+      res.setHeader('Content-Type', 'application/pdf')
+      res.setHeader('Content-Disposition', 'attachment; filename=MissBugReport.pdf')
+      res.sendFile(path.resolve(filePath))
+    })
+    .catch(err => {
+      console.error('Failed to generate PDF:', err)
+      res.status(500).send('Failed to generate PDF')
+    })
 })
 
 // GET /api/bug/:bugId (with cookie-based view limit)
