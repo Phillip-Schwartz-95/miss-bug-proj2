@@ -15,13 +15,9 @@
     "_id": "ghi789",
     "title": "Dropdown not working",
     "description": "Dropdown menu doesn't expand on click",
-    "severity": 1,
+    "severity": 5,
     "createdAt": 1542122359454,
-    "labels": [
-      "minor",
-      "frontend",
-      "review"
-    ]
+    "labels": []
   },
   {
     "_id": "jkl012",
@@ -46,5 +42,20 @@
       "frontend",
       "review"
     ]
+  },
+  {
+    "_id": "qEXrD3",
+    "title": "Bug 1754677362787",
+    "description": "test2",
+    "severity": 4,
+    "labels": [],
+    "createdAt": 1754677369924
+  },
+  {
+    "title": "Bug 1754684813110",
+    "description": "Describe the bug here...",
+    "severity": 3,
+    "_id": "VJwZ0R",
+    "createdAt": 1754684816200
   }
 ]

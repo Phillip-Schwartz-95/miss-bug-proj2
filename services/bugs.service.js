@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { utilService } from '../public/services/util.service.js'
 
 const bugFilePath = path.resolve('data/bugs.json')
 
@@ -64,34 +65,34 @@ function getDefaultFilter() {
 }
 
 function getById(bugId) {
-  const bugs = query()
+  const bugs = JSON.parse(fs.readFileSync(bugFilePath, 'utf-8'))
   return bugs.find(bug => bug._id === bugId)
 }
 
 //total bugs
 function getTotalCount(filterBy = {}) {
-  const bugs = query(filterBy) 
+  const bugs = query(filterBy)
   return bugs.length
 }
 
+// Save or update a bug
 function save(bugToSave) {
   const bugs = query()
 
   if (!bugToSave._id) {
-    throw new Error('Missing bug ID')
-  }
-
-  const idx = bugs.findIndex(bug => bug._id === bugToSave._id)
-
-  if (idx === -1) {
+    bugToSave._id = utilService.makeId()
     bugToSave.createdAt = Date.now()
     bugs.push(bugToSave)
   } else {
+    const idx = bugs.findIndex(bug => bug._id === bugToSave._id)
+    if (idx === -1) throw new Error('Bug not found')
     bugs[idx] = { ...bugs[idx], ...bugToSave }
   }
 
   fs.writeFileSync(bugFilePath, JSON.stringify(bugs, null, 2))
-  return bugToSave
+
+  // Return the saved bug from bugs array by id, to ensure correct _id and all props
+  return bugs.find(bug => bug._id === bugToSave._id)
 }
 
 function remove(bugId) {

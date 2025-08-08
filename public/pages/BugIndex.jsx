@@ -8,7 +8,7 @@ import { BugList } from '../cmps/BugList.jsx'
 
 export function BugIndex() {
     const pageSize = 5
-    const [bugs, setBugs] = useState(null)
+    const [bugs, setBugs] = useState([])
     const [filterBy, setFilterBy] = useState(bugService.getDefaultFilter())
     const [sortBy, setSortBy] = useState('createdAt')
     const [sortDir, setSortDir] = useState(1)
@@ -61,7 +61,11 @@ export function BugIndex() {
 
         bugService.save(bug)
             .then(savedBug => {
-                setBugs([...bugs, savedBug])
+                console.log('Saved bug returned from backend:', savedBug)
+                if (!savedBug._id) {
+                    console.error('Saved bug does NOT have an _id! This will cause React key warning')
+                }
+                setBugs(prev => [...(prev || []), savedBug])
                 showSuccessMsg('Bug added')
             })
             .catch(err => showErrorMsg(`Cannot add bug`, err))
@@ -89,16 +93,16 @@ export function BugIndex() {
     }
 
     function onDownloadPdf() {
-    const query = {
-        ...filterBy,
-        sortBy,
-        sortDir,
-        pageIdx
-    }
+        const query = {
+            ...filterBy,
+            sortBy,
+            sortDir,
+            pageIdx
+        }
 
-    const queryStr = new URLSearchParams(query).toString()
-    window.open(`/api/bug/pdf?${queryStr}`, '_blank')
-}
+        const queryStr = new URLSearchParams(query).toString()
+        window.open(`/api/bug/pdf?${queryStr}`, '_blank')
+    }
 
     return <section className="bug-index main-content">
         <header>

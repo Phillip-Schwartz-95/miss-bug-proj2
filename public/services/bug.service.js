@@ -1,3 +1,5 @@
+import { utilService } from './util.service'
+
 const BASE_URL = '/api/bug/'
 
 export const bugService = {
@@ -9,7 +11,7 @@ export const bugService = {
     getDefaultFilter,
 }
 
-function query(filterBy) {
+function query(filterBy = {}) {
     const queryStr = new URLSearchParams()
 
     for (const key in filterBy) {
@@ -26,19 +28,20 @@ function query(filterBy) {
 }
 
 function getById(bugId) {
-    return axios.get(BASE_URL + bugId)
+    return axios.get(`${BASE_URL}${bugId}`)
         .then(res => res.data)
 }
 
 function remove(bugId) {
-    const url = BASE_URL + bugId + '/remove'
-    return axios.get(url)
+    if (!bugId) return Promise.reject(new Error('Bug ID is required'))
+    return axios.delete(`${BASE_URL}${bugId}`)
 }
 
 function save(bug) {
-    let queryParams = `?title=${encodeURIComponent(bug.title)}&description=${encodeURIComponent(bug.description)}&severity=${bug.severity}`
-    if (bug._id) queryParams += `&_id=${bug._id}`
-    return axios.get(BASE_URL + 'save/' + queryParams)
+    const url = bug._id ? `${BASE_URL}${bug._id}` : BASE_URL
+    const method = bug._id ? 'put' : 'post'
+
+    return axios[method](url, bug)
         .then(res => res.data)
 }
 
