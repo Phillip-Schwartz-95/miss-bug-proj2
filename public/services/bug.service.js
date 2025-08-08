@@ -1,4 +1,3 @@
-import { utilService } from './util.service'
 
 const BASE_URL = '/api/bug/'
 

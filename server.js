@@ -3,6 +3,8 @@ import { bugService } from './services/bugs.service.js'
 import cookieParser from 'cookie-parser'
 import { pdfService } from './services/pdf.service.js'
 import path from 'path'
+import { authService } from './services/auth.service.js'
+import { userService } from './services/user.service.js'
 
 const app = express()
 
@@ -62,25 +64,64 @@ app.get('/api/bug/pdf', (req, res) => {
 
 // POST /api/bug - Create new bug
 app.post('/api/bug', (req, res) => {
-  const bug = req.body
+  const user = authService.validateToken(req.cookies.loginToken)
+  if (!user) return res.status(401).send('Not logged in')
+
+  const bug = {
+    ...req.body,
+    createdAt: Date.now(),
+    creator: { _id: user._id, fullname: user.fullname }
+  }
+
   Promise.resolve(bugService.save(bug))
     .then(savedBug => res.send(savedBug))
-    .catch(err => res.status(400).send('Cannot save bug'))
+    .catch(err => {
+      console.error('Cannot save bug:', err)
+      res.status(400).send('Cannot save bug')
+    })
 })
 
 // PUT /api/bug/:bugId - Update existing bug
 app.put('/api/bug/:bugId', (req, res) => {
-  const bug = { ...req.body, _id: req.params.bugId }
-  Promise.resolve(bugService.save(bug))
+  const user = authService.validateToken(req.cookies.loginToken)
+  if (!user) return res.status(401).send('Not logged in')
+
+  bugService.getById(req.params.bugId)
+    .then(bug => {
+      if (!bug) return res.status(404).send('Bug not found')
+
+      const isOwner = bug.creator?._id === user._id
+      if (!isOwner && !user.isAdmin) return res.status(403).send('Not authorized')
+
+      const updatedBug = { ...req.body, _id: req.params.bugId }
+      return bugService.save(updatedBug)
+    })
     .then(savedBug => res.send(savedBug))
-    .catch(err => res.status(400).send('Cannot update bug'))
+    .catch(err => {
+      console.error('Cannot update bug:', err)
+      res.status(400).send('Cannot update bug')
+    })
 })
 
 // DELETE /api/bug/:bugId - Remove bug
 app.delete('/api/bug/:bugId', (req, res) => {
-  Promise.resolve(bugService.remove(req.params.bugId))
+  const user = authService.validateToken(req.cookies.loginToken)
+  if (!user) return res.status(401).send('Not logged in')
+
+  bugService.getById(req.params.bugId)
+    .then(bug => {
+      if (!bug) return res.status(404).send('Bug not found')
+
+      const isOwner = bug.creator?._id === user._id
+      if (!isOwner && !user.isAdmin) return res.status(403).send('Not authorized')
+
+      return bugService.remove(req.params.bugId)
+    })
     .then(() => res.send('Removed!'))
-    .catch(err => res.status(400).send('Cannot remove bug'))
+    .catch(err => {
+      console.error('Cannot remove bug:', err)
+      res.status(400).send('Cannot remove bug')
+    })
 })
 
 // GET /api/bug/:bugId (with cookie-based view limit)
@@ -115,6 +156,35 @@ app.get('/api/bug/:bugId', (req, res) => {
       console.error('Cannot get bug:', err)
       res.status(400).send('Cannot get bug')
     })
+})
+
+//user API
+// GET all users
+app.get('/api/user', (req, res) => {
+  console.log('📨 GET /api/user called')
+  userService.query()
+    .then(users => {
+      console.log('Users returned:', users)
+      res.json(users)
+    })
+    .catch(err => {
+      console.log('Error in route:', err)
+      res.status(500).send('Failed to get users')
+    })
+})
+
+// GET user by ID
+app.get('/api/user/:id', (req, res) => {
+  userService.getById(req.params.id)
+    .then(user => res.json(user))
+    .catch(err => res.status(404).send(err))
+})
+
+// POST new user
+app.post('/api/user', (req, res) => {
+  userService.add(req.body)
+    .then(newUser => res.json(newUser))
+    .catch(err => res.status(400).send(err))
 })
 
 const port = 3030

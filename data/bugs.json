@@ -5,6 +5,10 @@
     "description": "Homepage crashes with error 502",
     "severity": 2,
     "createdAt": 1542111359454,
+    "creator": {
+      "_id": "u101",
+      "fullname": "Puki Ja"
+    },
     "labels": [
       "critical",
       "backend",
@@ -17,6 +21,10 @@
     "description": "Dropdown menu doesn't expand on click",
     "severity": 5,
     "createdAt": 1542122359454,
+    "creator": {
+      "_id": "u102",
+      "fullname": "Admin Guy"
+    },
     "labels": []
   },
   {
@@ -25,6 +33,10 @@
     "description": "App takes too long to respond after login",
     "severity": 3,
     "createdAt": 1542133359454,
+    "creator": {
+      "_id": "u103",
+      "fullname": "Puki Ja"
+    },
     "labels": [
       "performance",
       "critical",
@@ -37,6 +49,10 @@
     "description": "Cart total miscalculates when applying discount",
     "severity": 2,
     "createdAt": 1542144359454,
+    "creator": {
+      "_id": "u104",
+      "fullname": "Puki Ja"
+    },
     "labels": [
       "logic",
       "frontend",
@@ -49,13 +65,21 @@
     "description": "test2",
     "severity": 4,
     "labels": [],
-    "createdAt": 1754677369924
+    "createdAt": 1754677369924,
+    "creator": {
+      "_id": "u105",
+      "fullname": "Puki Ja"
+    }
   },
   {
     "title": "Bug 1754684813110",
     "description": "Describe the bug here...",
     "severity": 3,
     "_id": "VJwZ0R",
-    "createdAt": 1754684816200
+    "createdAt": 1754684816200,
+    "creator": {
+      "_id": "u106",
+      "fullname": "Admin Guy"
+    }
   }
 ]
