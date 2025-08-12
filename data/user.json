@@ -12,5 +12,10 @@
     "password": "admin",
     "fullname": "Admin Guy",
     "isAdmin": true
+  },
+  {
+    "username": "phil",
+    "password": "1234",
+    "_id": "8j4tdB"
   }
 ]

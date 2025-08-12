@@ -1,8 +1,9 @@
 import express from 'express'
-import { bugService } from './services/bugs.service.js'
 import cookieParser from 'cookie-parser'
-import { pdfService } from './services/pdf.service.js'
 import path from 'path'
+
+import { bugService } from './services/bugs.service.js'
+import { pdfService } from './services/pdf.service.js'
 import { authService } from './services/auth.service.js'
 import { userService } from './services/user.service.js'
 
@@ -17,9 +18,48 @@ app.use(express.json()) // for parsing application/json
 app.get('/', (req, res) => res.send('Hello there'))
 app.get('/nono', (req, res) => res.redirect('/'))
 
+// AUTH ROUTEs
+
+// SIGNUP
+app.post('/api/auth/signup', (req, res) => {
+  const newUser = req.body
+  console.log('Signup data:', req.body)
+  userService.add(newUser)
+    .then(user => {
+      const loginToken = authService.getLoginToken(user)
+      res.cookie('loginToken', loginToken, { httpOnly: true })
+      res.json(user)
+    })
+    .catch(err => {
+      res.status(400).send({ err: err.toString() })
+    })
+})
+
+// LOGIN
+app.post('/api/auth/login', (req, res) => {
+  const credentials = req.body
+  authService.checkLogin(credentials)
+    .then(user => {
+      const loginToken = authService.getLoginToken(user)
+      res.cookie('loginToken', loginToken, { httpOnly: true })
+      const miniUser = { _id: user._id, fullname: user.fullname, isAdmin: user.isAdmin }
+      res.json(miniUser)
+    })
+    .catch(err => {
+      res.status(401).send({ err: err.toString() })
+    })
+})
+
+// LOGOUT
+app.post('/api/auth/logout', (req, res) => {
+  res.clearCookie('loginToken')
+  res.send({ msg: 'Logged out' })
+})
+
+// ======= BUG ROUTES =======
+
 // GET /api/bug with filtering, sorting, paging
 app.get('/api/bug', (req, res) => {
-  console.log('Incoming query:', req.query)
   const filterBy = req.query
 
   Promise.resolve(bugService.query(filterBy))
@@ -34,11 +74,7 @@ app.get('/api/bug', (req, res) => {
 app.get('/api/bug/count', (req, res) => {
   try {
     const filterBy = req.query
-    console.log('Received filterBy:', filterBy)
-
     const total = bugService.getTotalCount(filterBy)
-    console.log('Calculated total bugs:', total)
-
     res.json({ total })
   } catch (err) {
     console.error('Error in /api/bug/count:', err)
@@ -62,7 +98,7 @@ app.get('/api/bug/pdf', (req, res) => {
     })
 })
 
-// POST /api/bug - Create new bug
+// POST /api/bug - Create new bug (requires login)
 app.post('/api/bug', (req, res) => {
   const user = authService.validateToken(req.cookies.loginToken)
   if (!user) return res.status(401).send('Not logged in')
@@ -81,7 +117,7 @@ app.post('/api/bug', (req, res) => {
     })
 })
 
-// PUT /api/bug/:bugId - Update existing bug
+// PUT /api/bug/:bugId - Update existing bug (requires login + owner/admin)
 app.put('/api/bug/:bugId', (req, res) => {
   const user = authService.validateToken(req.cookies.loginToken)
   if (!user) return res.status(401).send('Not logged in')
@@ -103,7 +139,7 @@ app.put('/api/bug/:bugId', (req, res) => {
     })
 })
 
-// DELETE /api/bug/:bugId - Remove bug
+// DELETE /api/bug/:bugId - Remove bug (requires login + owner/admin)
 app.delete('/api/bug/:bugId', (req, res) => {
   const user = authService.validateToken(req.cookies.loginToken)
   if (!user) return res.status(401).send('Not logged in')
@@ -128,7 +164,6 @@ app.delete('/api/bug/:bugId', (req, res) => {
 app.get('/api/bug/:bugId', (req, res) => {
   const bugId = req.params.bugId
 
-  // Reserved word check
   const reserved = ['save', 'pdf', 'count']
   if (reserved.includes(bugId)) {
     return res.status(400).send('Invalid bug ID')
@@ -142,7 +177,6 @@ app.get('/api/bug/:bugId', (req, res) => {
   }
 
   visitedBugs = [...new Set([...visitedBugs, bugId])]
-  console.log('User visited the following bugs:', visitedBugs)
 
   if (visitedBugs.length > 3) {
     return res.status(401).send('Wait for a bit')
@@ -158,19 +192,13 @@ app.get('/api/bug/:bugId', (req, res) => {
     })
 })
 
-//user API
+// ======= USER ROUTES =======
+
 // GET all users
 app.get('/api/user', (req, res) => {
-  console.log('📨 GET /api/user called')
   userService.query()
-    .then(users => {
-      console.log('Users returned:', users)
-      res.json(users)
-    })
-    .catch(err => {
-      console.log('Error in route:', err)
-      res.status(500).send('Failed to get users')
-    })
+    .then(users => res.json(users))
+    .catch(err => res.status(500).send('Failed to get users'))
 })
 
 // GET user by ID
@@ -187,6 +215,7 @@ app.post('/api/user', (req, res) => {
     .catch(err => res.status(400).send(err))
 })
 
+// Start the server
 const port = 3030
 app.listen(port, () => {
   console.log(`Server listening at http://127.0.0.1:${port}/`)
