@@ -1,38 +1,38 @@
-// public/services/user.service.js
-axios.defaults.withCredentials = true
-
-const BASE_URL = '/api/auth/'
+const BASE_URL = '/api/user/'
 
 export const userService = {
-  login,
-  signup,
-  logout,
-  getLoggedinUser,
+    remove,
+    query,
+    getById,
+    getEmptyCredentials,
+    getUserWithBugs
 }
 
-function login(credentials) {
-  return axios.post(BASE_URL + 'login', credentials)
-    .then(res => {
-      sessionStorage.setItem('loggedinUser', JSON.stringify(res.data))
-      return res.data
-    })
+function query() {
+    return axios.get(BASE_URL)
+        .then(res => res.data)
 }
 
-function signup(credentials) {
-  return axios.post(BASE_URL + 'signup', credentials)
-    .then(res => {
-      sessionStorage.setItem('loggedinUser', JSON.stringify(res.data))
-      return res.data
-    })
+function remove(userId) {
+    return axios.delete(BASE_URL + userId)
+        .then(res => res.data)
 }
 
-function logout() {
-  return axios.post(BASE_URL + 'logout')
-    .then(() => {
-      sessionStorage.removeItem('loggedinUser')
-    })
+function getById(userId) {
+    return axios.get(BASE_URL + userId)
+        .then(res => res.data)
 }
 
-function getLoggedinUser() {
-  return JSON.parse(sessionStorage.getItem('loggedinUser') || 'null')
+function getUserWithBugs(userId) {
+    return axios.get(BASE_URL + userId + '?getBugs=true')
+        .then(res => res.data)
+        .then(console.log)
+}
+
+function getEmptyCredentials() {
+    return {
+        username: '',
+        password: '',
+        fullname: ''
+    }
 }

@@ -1,26 +1,42 @@
+import Cryptr from 'cryptr'
 import { userService } from './user.service.js'
+const cryptr = new Cryptr(process.env.SECRET1 || 'secret-puk-1234')
 
 export const authService = {
-  checkLogin,
-  getLoginToken,
-  validateToken
+    checkLogin,
+    getLoginToken,
+    validateToken,
 }
 
 function checkLogin({ username, password }) {
-  return userService.getByUsername(username).then(user => {
-    if (!user || user.password !== password) throw new Error('Invalid credentials')
-    return user
-  })
+    console.log('checkLogin called with:', username, password)
+    return userService.getByUsername(username)
+        .then(user => {
+            console.log('User found:', user)
+            if (user && user.password === password) {
+                user = { ...user }
+                delete user.password
+                return Promise.resolve(user)
+            }
+            console.log('Invalid username or password')
+            return Promise.reject('Invalid username or password')
+        })
+        .catch(err => {
+            console.error('Error in checkLogin:', err)
+            throw err
+        })
 }
 
 function getLoginToken(user) {
-  return JSON.stringify({ _id: user._id, fullname: user.fullname, isAdmin: user.isAdmin })
+    const str = JSON.stringify(user)
+    const encryptedStr = cryptr.encrypt(str)
+    return encryptedStr
 }
 
+
 function validateToken(token) {
-  try {
-    return JSON.parse(token)
-  } catch {
-    return null
-  }
+    if (!token) return null
+    const str = cryptr.decrypt(token)
+    const user = JSON.parse(str)
+    return user
 }

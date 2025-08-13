@@ -5,6 +5,7 @@ import { bugService } from '../services/bug.service.js'
 import { showSuccessMsg, showErrorMsg } from '../services/event-bus.service.js'
 import { BugFilter } from '../cmps/BugFilter.jsx'
 import { BugList } from '../cmps/BugList.jsx'
+import { authService } from '../services/auth.service.js'
 
 export function BugIndex() {
     const pageSize = 5
@@ -15,6 +16,7 @@ export function BugIndex() {
     const [pageIdx, setPageIdx] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [totalBugs, setTotalBugs] = useState(0)
+    const loggedinUser = authService.getLoggedinUser()
 
     bugService.getTotalBugs(filterBy).then(res => {
         console.log('Total bugs from backend:', res.total)
@@ -43,6 +45,10 @@ export function BugIndex() {
     }
 
     function onRemoveBug(bugId) {
+        if (!loggedinUser) {
+            showErrorMsg('You must be logged in to remove a bug')
+            return
+        }
         bugService.remove(bugId)
             .then(() => {
                 const bugsToUpdate = bugs.filter(bug => bug._id !== bugId)
@@ -53,6 +59,10 @@ export function BugIndex() {
     }
 
     function onAddBug() {
+        if (!loggedinUser) {
+            showErrorMsg('You must be logged in to add a bug')
+            return
+        }
         const bug = {
             title: prompt('Bug title?', 'Bug ' + Date.now()),
             description: prompt('Bug description?', 'Describe the bug here...'),
@@ -72,6 +82,10 @@ export function BugIndex() {
     }
 
     function onEditBug(bug) {
+        if (!loggedinUser) {
+            showErrorMsg('You must be logged in to edit a bug')
+            return
+        }
         const severity = +prompt('New severity?', bug.severity)
         if (!severity || severity === bug.severity) return
 
