@@ -72,14 +72,14 @@
     }
   },
   {
-    "title": "Bug 1754684813110",
+    "title": "Bug 1755276891224",
     "description": "Describe the bug here...",
-    "severity": 3,
-    "_id": "VJwZ0R",
-    "createdAt": 1754684816200,
+    "severity": 2,
+    "createdAt": 1755276897380,
     "creator": {
-      "_id": "u106",
-      "fullname": "Admin Guy"
-    }
+      "_id": "znKVxH",
+      "fullname": "nuki pa"
+    },
+    "_id": "QMawRN"
   }
 ]

@@ -24,7 +24,7 @@ app.get('/nono', (req, res) => res.redirect('/'))
 app.post('/api/auth/signup', (req, res) => {
   const newUser = req.body
   console.log('Signup data:', req.body)
-  userService.add(newUser)
+  userService.signup(newUser)       // <-- change add() to signup()
     .then(user => {
       const loginToken = authService.getLoginToken(user)
       res.cookie('loginToken', loginToken, { httpOnly: true })
@@ -206,13 +206,6 @@ app.get('/api/user/:id', (req, res) => {
   userService.getById(req.params.id)
     .then(user => res.json(user))
     .catch(err => res.status(404).send(err))
-})
-
-// POST new user
-app.post('/api/user', (req, res) => {
-  userService.add(req.body)
-    .then(newUser => res.json(newUser))
-    .catch(err => res.status(400).send(err))
 })
 
 // Start the server

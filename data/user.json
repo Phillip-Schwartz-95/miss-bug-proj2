@@ -12,5 +12,19 @@
     "password": "admin",
     "fullname": "Admin Guy",
     "isAdmin": true
+  },
+  {
+    "_id": "znKVxH",
+    "fullname": "nuki pa",
+    "username": "nuki",
+    "password": "5678",
+    "isAdmin": false
+  },
+  {
+    "_id": "aEgS0w",
+    "fullname": "shmuki la",
+    "username": "shmuki",
+    "password": "9876",
+    "isAdmin": false
   }
 ]
