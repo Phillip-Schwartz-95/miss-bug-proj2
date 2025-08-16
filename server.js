@@ -209,7 +209,7 @@ app.get('/api/user/:id', (req, res) => {
 })
 
 // Start the server
-const port = 3030
+const port = process.env.PORT || 3030
 app.listen(port, () => {
-  console.log(`Server listening at http://127.0.0.1:${port}/`)
+  console.log(`Server listening on port ${port}`)
 })
